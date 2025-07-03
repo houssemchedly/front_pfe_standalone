@@ -1,11 +1,17 @@
 import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { MainViewComponent } from './main-view/main-view.component';
 
 @Component({
     selector: 'app-empty',
     standalone: true,
-    template: ` <div class="card">
-        <div class="font-semibold text-xl mb-4">Empty Page</div>
-        <p>Use this page to start from scratch and place your custom content.</p>
-    </div>`
+    imports: [
+        CommonModule,
+        FontAwesomeModule,
+        MainViewComponent
+    ],
+    template: '<app-main-view></app-main-view>'
+
 })
 export class Empty {}
