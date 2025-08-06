@@ -16,6 +16,7 @@ export const appRoutes: Routes = [
             { path: 'pages', loadChildren: () => import('./app/pages/pages.routes') }
         ]
     },
+    {path: 'projets', loadChildren: () => import('./app/modules/projet/projet-routing.module').then(m => m.ProjetRoutingModule)},
     { path: 'landing', component: Landing },
     { path: 'notfound', component: Notfound },
     { path: 'auth', loadChildren: () => import('./app/pages/auth/auth.routes') },

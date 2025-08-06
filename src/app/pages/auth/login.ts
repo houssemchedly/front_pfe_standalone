@@ -1,17 +1,21 @@
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
 import { CheckboxModule } from 'primeng/checkbox';
 import { InputTextModule } from 'primeng/inputtext';
 import { PasswordModule } from 'primeng/password';
 import { RippleModule } from 'primeng/ripple';
 import { AppFloatingConfigurator } from '../../layout/component/app.floatingconfigurator';
+import { AuthenticationRequest } from '../../services/models/authentication-request';
+import { NgForOf, NgIf } from '@angular/common';
+import { AuthenticationService } from '../../services/services/authentication.service';
+import { TokenService } from '../../services/token/token.service';
 
 @Component({
     selector: 'app-login',
     standalone: true,
-    imports: [ButtonModule, CheckboxModule, InputTextModule, PasswordModule, FormsModule, RouterModule, RippleModule, AppFloatingConfigurator],
+    imports: [ButtonModule, CheckboxModule, InputTextModule, PasswordModule, FormsModule, RouterModule, RippleModule, AppFloatingConfigurator, NgIf, NgForOf],
     template: `
         <app-floating-configurator />
         <div class="bg-surface-50 dark:bg-surface-950 flex items-center justify-center min-h-screen min-w-[100vw] overflow-hidden">
@@ -39,13 +43,15 @@ import { AppFloatingConfigurator } from '../../layout/component/app.floatingconf
                             <div class="text-surface-900 dark:text-surface-0 text-3xl font-medium mb-4">Welcome to PrimeLand!</div>
                             <span class="text-muted-color font-medium">Sign in to continue</span>
                         </div>
-
-                        <div>
+                        <div class="alert alert-danger" role="alert" *ngIf="errorMsg.length">
+                            <p *ngFor="let msg of errorMsg">{{ msg }}</p>
+                        </div>
+                        <div class="mb-3">
                             <label for="email1" class="block text-surface-900 dark:text-surface-0 text-xl font-medium mb-2">Email</label>
-                            <input pInputText id="email1" type="text" placeholder="Email address" class="w-full md:w-[30rem] mb-8" [(ngModel)]="email" />
+                            <input [(ngModel)]="authRequest.email" pInputText id="email1" type="text" placeholder="Email address" class="w-full md:w-[30rem] mb-8">
 
                             <label for="password1" class="block text-surface-900 dark:text-surface-0 font-medium text-xl mb-2">Password</label>
-                            <p-password id="password1" [(ngModel)]="password" placeholder="Password" [toggleMask]="true" styleClass="mb-4" [fluid]="true" [feedback]="false"></p-password>
+                            <input [(ngModel)]="authRequest.password" pInputText id="password1" type="text"  placeholder="Password" class="w-full md:w-[30rem] mb-8" >
 
                             <div class="flex items-center justify-between mt-2 mb-8 gap-8">
                                 <div class="flex items-center">
@@ -54,7 +60,10 @@ import { AppFloatingConfigurator } from '../../layout/component/app.floatingconf
                                 </div>
                                 <span class="font-medium no-underline ml-2 text-right cursor-pointer text-primary">Forgot password?</span>
                             </div>
-                            <p-button label="Sign In" styleClass="w-full" routerLink="/"></p-button>
+                            <div class="flex flex-col gap-4">
+                                <p-button (click)="login()" label="Sign In" styleClass="w-full" ></p-button>
+                                <p-button (click)="register()" label="Sign up" styleClass="w-full" ></p-button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -63,9 +72,40 @@ import { AppFloatingConfigurator } from '../../layout/component/app.floatingconf
     `
 })
 export class Login {
-    email: string = '';
-
-    password: string = '';
+    authRequest: AuthenticationRequest = { email: '', password: '' };
+    errorMsg: Array<string> = [];
 
     checked: boolean = false;
+
+    constructor(
+        private  router: Router,
+        private  authService: AuthenticationService,
+        private tokenService: TokenService
+    ) {
+    }
+
+
+    login() {
+        this.errorMsg = [];
+        this.authService.authenticate({
+            body: this.authRequest
+        }).subscribe({
+            next: (res) => {
+                this.tokenService.token = res.token as string;
+                this.router.navigate(['dashboard']);
+            },
+            error: (err) => {
+                console.log(err);
+                if (err.error.validationErrors) {
+                    this.errorMsg = err.error.validationErrors
+                } else {
+                    this.errorMsg.push(err.error.errorMsg);
+                }
+            }
+        })
+    }
+
+    register() {
+        this.router.navigate(['/auth/register']);
+    }
 }

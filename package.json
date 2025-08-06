@@ -27,6 +27,7 @@
         "@ng-bootstrap/ng-bootstrap": "^18.0.0",
         "@popperjs/core": "^2.11.8",
         "@primeng/themes": "^19.0.5",
+        "angular-code-input": "^2.0.0",
         "chart.js": "4.4.2",
         "ng-openapi-gen": "^0.53.0",
         "primeclt": "^0.1.5",
